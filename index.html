@@ -406,7 +406,7 @@ function App(){
   const n=dim(year,month);
   const cellStyle=val=>{if(!val)return{};const p=presets.find(p=>p.label===val);return p?{background:p.bg,color:p.fg}:{background:'#f7fafc',color:'#4a5568'}};
   const empSum=employees.map(emp=>{let wd=0,th=0;for(let d=1;d<=n;d++){const s=getS(emp.id,d);if(s)wd++;th+=parseHours(s)}return{id:emp.id,wd,th}});
-  const EXCLUDE_COUNT=['KC','イベント'];
+  const EXCLUDE_COUNT=['KC','イベント','休'];
   const dayCount=Array.from({length:n},(_,i)=>employees.filter(emp=>{const s=getS(emp.id,i+1);return s&&!EXCLUDE_COUNT.includes(s)}).length);
   const daySum=Array.from({length:n},(_,i)=>employees.reduce((a,emp)=>a+parseHours(getS(emp.id,i+1)),0));
   const syncColor=sync==='ok'?'#68d391':sync==='saving'?'#f6ad55':'#fc8181';
