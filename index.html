@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1a365d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="シフト管理">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  <title>シフト管理 - 飛笑朗</title>
+  <script src="react.min.js"></script>
+  <script src="react-dom.min.js"></script>
+  <script src="babel.min.js"></script>
+  <script src="jspdf.min.js"></script>
+  <script src="html2canvas.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Hiragino Sans','Yu Gothic','Meiryo',sans-serif;background:#F0F4F8;color:#1a202c;font-size:13px}
+
+    /* ヘッダー */
+    .hdr{background:#1a365d;color:#fff;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+    .hdr-title{font-size:16px;font-weight:700}
+    .month-nav{display:flex;align-items:center;gap:8px}
+    .month-lbl{font-size:16px;font-weight:700;min-width:110px;text-align:center}
+    .nbtn{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;border:none;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
+    .nbtn:hover{background:rgba(255,255,255,.32)}
+    .hdr-sp{flex:1}
+    .btn{padding:6px 12px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:500;transition:all .15s;white-space:nowrap}
+    .btn-ghost{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)}
+    .btn-ghost:hover{background:rgba(255,255,255,.28)}
+    .btn-blue{background:#2b6cb0;color:#fff}
+    .btn-red{background:#c53030;color:#fff}
+    .btn-gray{background:#e2e8f0;color:#4a5568}
+    .btn-sm{padding:4px 8px;font-size:11px}
+    .btn-xs{padding:2px 6px;font-size:11px;border-radius:4px;border:none;cursor:pointer}
+    .btn-bulk{background:#d97706;color:#fff}
+    .btn-bulk.active{background:#92400e;box-shadow:0 0 0 2px #fcd34d}
+
+    /* 同期ステータス */
+    .sync-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:3px}
+
+    /* プリセットバー */
+    .preset-bar{display:flex;gap:8px;padding:8px 16px;background:#fff;border-bottom:1px solid #e2e8f0;align-items:center;flex-wrap:wrap}
+    .preset-chip{display:inline-flex;padding:3px 8px;border-radius:4px;font-size:12px;font-weight:600;border:1px solid transparent}
+    .preset-link{margin-left:auto;font-size:11px;color:#3182ce;cursor:pointer;text-decoration:underline;white-space:nowrap}
+
+    /* テーブル */
+    .main{padding:14px 14px 60px;overflow-x:auto}
+    .stbl{border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.1);white-space:nowrap}
+    .stbl th,.stbl td{border:1px solid #e2e8f0}
+    .th-name{min-width:100px;max-width:130px;padding:8px;background:#ebf4ff;font-weight:700;font-size:11px;color:#2c5282;position:sticky;left:0;z-index:4;border-right:2px solid #bee3f8;text-align:left}
+    .th-d{width:52px;min-width:52px;padding:5px 2px;background:#f7fafc;text-align:center}
+    .th-d .num{font-weight:700;font-size:13px;color:#2d3748}
+    .th-d .dow{font-size:10px;color:#a0aec0}
+    .th-d.hol,.th-d.sun{background:#fff5f5}
+    .th-d.hol .num,.th-d.hol .dow,.th-d.sun .num,.th-d.sun .dow{color:#c53030}
+    .th-d.sat{background:#fff5f5}
+    .th-d.sat .num,.th-d.sat .dow{color:#c53030}
+    .th-d.today-h{background:#e6fffa}
+    .today-dot{width:5px;height:5px;background:#38b2ac;border-radius:50%;margin:2px auto 0}
+    .th-sum{width:64px;min-width:64px;padding:5px 3px;background:#ebf4ff;font-size:10px;font-weight:700;color:#2c5282;text-align:center;border-left:2px solid #bee3f8;position:sticky;right:0;z-index:3}
+    .th-d.col-sel{background:#fef3c7!important}
+
+    .td-name{padding:5px 8px;background:#f7fafc;font-size:12px;font-weight:600;position:sticky;left:0;z-index:2;border-right:2px solid #e2e8f0;min-width:100px;max-width:130px;cursor:pointer}
+    .td-name:hover{background:#ebf8ff}
+    .name-inner{display:flex;align-items:center;gap:5px}
+    .ndot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .row-sel-icon{opacity:0;font-size:10px;color:#d97706;margin-left:3px;transition:opacity .15s}
+    .td-name:hover .row-sel-icon{opacity:1}
+
+    .td-s{padding:2px;cursor:pointer;text-align:center;height:36px}
+    .td-s.sun-bg,.td-s.sat-bg{background:#fff8f8}
+    .td-s:hover{background:#ebf8ff!important}
+    .td-s.sel{outline:2px solid #f59e0b;outline-offset:-2px;background:#fffbeb!important}
+    .cell-val{display:flex;align-items:center;justify-content:center;height:100%;border-radius:4px;font-size:12px;font-weight:600;padding:0 2px}
+
+    .td-sum{padding:4px 3px;background:#f7fafc;text-align:center;border-left:2px solid #e2e8f0;position:sticky;right:0;z-index:1}
+    .sum-h{font-size:12px;font-weight:700;color:#2d3748}
+    .sum-d{font-size:10px;color:#a0aec0}
+
+    .tr-count td{background:#f7fafc;padding:3px 2px;text-align:center;font-size:11px;font-weight:700;border-top:2px solid #cbd5e0}
+    .tr-add td{padding:6px;background:#fff}
+    .add-btn{width:100%;padding:6px;border:2px dashed #cbd5e0;background:transparent;border-radius:6px;color:#a0aec0;cursor:pointer;font-size:12px}
+    .add-btn:hover{border-color:#3182ce;color:#3182ce;background:#ebf8ff}
+
+    /* ポップアップ */
+    .popup{position:fixed;z-index:300;background:#fff;border-radius:10px;padding:10px;box-shadow:0 8px 30px rgba(0,0,0,.18);border:1px solid #e2e8f0;min-width:240px}
+    .popup-hdr{font-size:11px;font-weight:700;color:#718096;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+    .popup-close{cursor:pointer;font-size:15px;color:#a0aec0}
+    .popup-input-row{display:flex;gap:5px;margin-bottom:8px}
+    .popup-input{flex:1;padding:6px 8px;border:1.5px solid #cbd5e0;border-radius:6px;font-size:13px;font-weight:600;outline:none}
+    .popup-input:focus{border-color:#3182ce}
+    .popup-set{padding:6px 12px;background:#3182ce;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600}
+    .presets-label{font-size:10px;font-weight:600;color:#a0aec0;margin-bottom:5px}
+    .presets-grid{display:flex;flex-wrap:wrap;gap:4px}
+    .p-chip{padding:4px 8px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid transparent}
+    .p-chip:hover{filter:brightness(.9)}
+    .p-chip.active{border-width:2px}
+    .p-clear{padding:4px 8px;border-radius:5px;font-size:12px;cursor:pointer;background:#f7fafc;color:#718096;border:1px solid #e2e8f0}
+
+    /* モーダル */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:200}
+    .modal{background:#fff;border-radius:14px;padding:22px;width:360px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+    .modal h2{font-size:16px;font-weight:700;margin-bottom:16px}
+    .fg{margin-bottom:13px}
+    .fg label{display:block;font-size:11px;font-weight:600;color:#718096;margin-bottom:4px}
+    .fi{width:100%;padding:8px 10px;border:1.5px solid #cbd5e0;border-radius:7px;font-size:13px;outline:none}
+    .fi:focus{border-color:#3182ce}
+    .mact{display:flex;gap:6px;align-items:center;margin-top:16px}
+    .color-row{display:flex;gap:6px;flex-wrap:wrap}
+    .csw{width:24px;height:24px;border-radius:50%;cursor:pointer;border:3px solid transparent}
+    .csw.sel{border-color:#1a202c}
+    .preset-list{display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto}
+    .preset-row{display:flex;gap:6px;align-items:center}
+    .color-mini{display:flex;gap:4px;flex-wrap:wrap}
+    .csw-mini{width:18px;height:18px;border-radius:50%;cursor:pointer;border:2px solid transparent}
+    .csw-mini.sel{border-color:#1a202c}
+
+    /* 一括入力バー */
+    .bulk-bar{position:fixed;bottom:0;left:0;right:0;background:#1a202c;color:#fff;padding:10px 16px;display:flex;align-items:center;gap:8px;z-index:500;box-shadow:0 -4px 16px rgba(0,0,0,.3);flex-wrap:wrap}
+    .bulk-count{font-size:13px;font-weight:700;white-space:nowrap}
+    .bulk-count span{color:#fcd34d}
+    .bulk-chips{display:flex;gap:5px;flex-wrap:wrap;flex:1}
+    .bulk-chip{padding:5px 10px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid transparent}
+    .bulk-input{padding:5px 8px;border:1.5px solid #4a5568;border-radius:6px;background:#2d3748;color:#fff;font-size:12px;width:80px;outline:none}
+    .bulk-set{padding:5px 12px;background:#f59e0b;color:#1a202c;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer}
+    .bulk-cancel{padding:5px 10px;background:#c53030;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer}
+
+    .toast{position:fixed;bottom:20px;right:20px;background:#1a202c;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;z-index:400;animation:su .25s ease;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+    @keyframes su{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .loading{display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:12px;color:#718096;font-size:14px}
+
+    @media print{.hdr .btn,.add-btn,.preset-bar,.popup,.bulk-bar,.toast{display:none!important}.main{padding:4px}body{background:#fff}}
+
+    /* スマホ対応 */
+    .main{-webkit-overflow-scrolling:touch}
+    @media(max-width:600px){
+      .hdr{padding:8px 10px;gap:6px}
+      .hdr-title{font-size:13px}
+      .month-lbl{font-size:14px;min-width:90px}
+      .hdr-sp{display:none}
+      .btn-sm{padding:3px 7px;font-size:11px}
+      .preset-bar{padding:6px 10px;gap:5px}
+      .main{padding:8px 6px 80px}
+      .td-s{height:42px}
+      .th-d{width:44px;min-width:44px}
+      .th-name{min-width:80px;max-width:100px}
+      .td-name{min-width:80px;max-width:100px;font-size:11px}
+      /* ポップアップをボトムシートに */
+      .popup{position:fixed!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;width:100%!important;border-radius:16px 16px 0 0!important;padding:16px!important;min-width:unset!important;box-shadow:0 -4px 24px rgba(0,0,0,.18)!important}
+      .presets-grid{gap:6px}
+      .p-chip{padding:7px 12px;font-size:13px}
+      .p-clear{padding:7px 12px;font-size:13px}
+      .popup-input{font-size:16px}
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+const DB = 'https://hisho-shift-default-rtdb.asia-southeast1.firebasedatabase.app/data.json';
+
+const DEFAULT_PRESETS = [
+  {id:1,label:'9-14',bg:'#bee3f8',fg:'#2b6cb0'},
+  {id:2,label:'11-15',bg:'#c6f6d5',fg:'#276749'},
+  {id:3,label:'14-20',bg:'#fefcbf',fg:'#744210'},
+  {id:4,label:'11-00',bg:'#fed7d7',fg:'#9b2c2c'},
+  {id:5,label:'17-00',bg:'#e9d8fd',fg:'#553c9a'},
+  {id:6,label:'19-00',bg:'#fcd5b0',fg:'#7b341e'},
+  {id:7,label:'KC',bg:'#e2e8f0',fg:'#4a5568'},
+  {id:8,label:'MTG',bg:'#b2f5ea',fg:'#234e52'},
+];
+
+const DEFAULT_DATA = {
+  employees:[
+    {id:1,name:'山川 大地',color:'#3182ce'},
+    {id:2,name:'スタッフ2',color:'#e53e3e'},
+    {id:3,name:'スタッフ3',color:'#38a169'},
+  ],
+  shifts:{},presets:DEFAULT_PRESETS,nextId:4,nextPid:9,
+};
+
+const EMP_COLORS=['#3182ce','#e53e3e','#38a169','#d69e2e','#805ad5','#dd6b20','#319795','#d53f8c'];
+const CHIP_COLORS=[
+  {bg:'#bee3f8',fg:'#2b6cb0'},{bg:'#c6f6d5',fg:'#276749'},{bg:'#fefcbf',fg:'#744210'},
+  {bg:'#fed7d7',fg:'#9b2c2c'},{bg:'#e9d8fd',fg:'#553c9a'},{bg:'#fcd5b0',fg:'#7b341e'},
+  {bg:'#e2e8f0',fg:'#4a5568'},{bg:'#b2f5ea',fg:'#234e52'},
+];
+const WD=['日','月','火','水','木','金','土'];
+
+const HOLIDAYS=new Set(['2026-01-01','2026-01-12','2026-02-11','2026-02-23','2026-03-20',
+  '2026-04-29','2026-05-03','2026-05-04','2026-05-05','2026-05-06',
+  '2026-07-20','2026-08-11','2026-09-21','2026-09-22','2026-09-23',
+  '2026-10-12','2026-11-03','2026-11-23','2026-12-23']);
+
+function parseHours(v){
+  if(!v)return 0;
+  const m=v.match(/^(\d{1,2})[:\-](\d{1,2})$/);
+  if(!m)return 0;
+  let s=parseInt(m[1]),e=parseInt(m[2]);
+  if(e===0)e=24; if(e<=s)e+=24;
+  const d=e-s; return d>=6?d-1:d;
+}
+function dim(y,m){return new Date(y,m+1,0).getDate()}
+function dk(y,m,d){return`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`}
+function isHol(y,m,d){return HOLIDAYS.has(dk(y,m,d))}
+
+async function fbGet(){
+  try{const r=await fetch(DB);const d=await r.json();return d&&Object.keys(d).length?d:null}catch{return null}
+}
+async function fbSet(data){
+  try{await fetch(DB,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})}catch{}
+}
+
+function App(){
+  const now=new Date();
+  const [year,setYear]=useState(now.getFullYear());
+  const [month,setMonth]=useState(now.getMonth());
+  const [data,setData]=useState(null);
+  const [sync,setSync]=useState('loading');
+  const [popup,setPopup]=useState(null);
+  const [inputVal,setInputVal]=useState('');
+  const [empMod,setEmpMod]=useState(null);
+  const [presetMod,setPresetMod]=useState(false);
+  const [toast,setToast]=useState(null);
+  const [bulkMode,setBulkMode]=useState(false);
+  const [selected,setSelected]=useState(new Set());
+  const [bulkInput,setBulkInput]=useState('');
+  const popRef=useRef(null);
+  const inputRef=useRef(null);
+  const saveTimer=useRef(null);
+  const isRemote=useRef(false);
+
+  // 全hooksをここに集約
+  useEffect(()=>{
+    fbGet().then(d=>{setData(d||DEFAULT_DATA);setSync('ok')}).catch(()=>{setData(DEFAULT_DATA);setSync('error')});
+    const t=setInterval(()=>{
+      if(saveTimer.current)return;
+      fbGet().then(d=>{if(!d)return;isRemote.current=true;setData(d);setSync('ok')}).catch(()=>{});
+    },5000);
+    return()=>clearInterval(t);
+  },[]);
+
+  useEffect(()=>{
+    if(!data)return;
+    if(isRemote.current){isRemote.current=false;return}
+    if(saveTimer.current)clearTimeout(saveTimer.current);
+    setSync('saving');
+    saveTimer.current=setTimeout(()=>{
+      fbSet(data).then(()=>setSync('ok')).catch(()=>setSync('error'));
+      saveTimer.current=null;
+    },800);
+  },[data]);
+
+  useEffect(()=>{
+    if(!popup)return;
+    const h=e=>{if(popRef.current&&!popRef.current.contains(e.target))setPopup(null)};
+    document.addEventListener('mousedown',h);
+    return()=>document.removeEventListener('mousedown',h);
+  },[popup]);
+
+  useEffect(()=>{
+    if(popup&&inputRef.current)setTimeout(()=>inputRef.current?.focus(),50);
+  },[popup]);
+
+  if(!data)return(
+    <div className="loading"><div style={{fontSize:28}}>📋</div><div>読み込み中...</div></div>
+  );
+
+  const {employees,shifts={},presets,nextId,nextPid}=data;
+  const flash=msg=>{setToast(msg);setTimeout(()=>setToast(null),1800)};
+  const prevM=()=>month===0?(setYear(y=>y-1),setMonth(11)):setMonth(m=>m-1);
+  const nextM=()=>month===11?(setYear(y=>y+1),setMonth(0)):setMonth(m=>m+1);
+  const getS=(eid,d)=>shifts[dk(year,month,d)]?.[eid]??'';
+  const setS=(eid,d,val)=>{
+    const k=dk(year,month,d);
+    setData(dt=>({...dt,shifts:{...dt.shifts,[k]:{...(dt.shifts[k]||{}),[eid]:val}}}));
+  };
+
+  const isMobile=()=>window.innerWidth<=600;
+  const openPopup=(eid,day,e)=>{
+    if(isMobile()){
+      setInputVal(getS(eid,day));
+      setPopup({eid,day,x:0,y:0,mobile:true});
+      return;
+    }
+    const r=e.currentTarget.getBoundingClientRect();
+    const x=Math.min(r.left,window.innerWidth-255);
+    const y=Math.min(r.bottom+4,window.innerHeight-250);
+    setInputVal(getS(eid,day));
+    setPopup({eid,day,x,y,mobile:false});
+  };
+  const applyVal=val=>{if(!popup)return;setS(popup.eid,popup.day,val.trim());setPopup(null)};
+
+  const addEmp=(name,color)=>{
+    setData(dt=>({...dt,employees:[...dt.employees,{id:dt.nextId,name,color}],nextId:dt.nextId+1}));
+    flash(`${name} を追加しました`);
+  };
+  const updEmp=(id,name,color)=>{
+    setData(dt=>({...dt,employees:dt.employees.map(e=>e.id===id?{...e,name,color}:e)}));
+    flash('更新しました');
+  };
+  const delEmp=id=>{
+    const emp=employees.find(e=>e.id===id);
+    if(!confirm(`「${emp?.name}」を削除しますか？`))return;
+    setData(dt=>{
+      const ns={};
+      for(const[k,v]of Object.entries(dt.shifts)){const{[id]:_,...rest}=v;if(Object.keys(rest).length)ns[k]=rest}
+      return{...dt,employees:dt.employees.filter(e=>e.id!==id),shifts:ns};
+    });
+    flash(`${emp?.name} を削除しました`);
+  };
+
+  // 一括入力
+  const sk=(eid,day)=>`${eid}-${day}`;
+  const toggleSel=(eid,day)=>setSelected(s=>{const ns=new Set(s);ns.has(sk(eid,day))?ns.delete(sk(eid,day)):ns.add(sk(eid,day));return ns});
+  const selectRow=eid=>{
+    const n=dim(year,month);
+    setSelected(s=>{
+      const ns=new Set(s);
+      const all=Array.from({length:n},(_,i)=>sk(eid,i+1)).every(k=>ns.has(k));
+      Array.from({length:n},(_,i)=>sk(eid,i+1)).forEach(k=>all?ns.delete(k):ns.add(k));
+      return ns;
+    });
+  };
+  const selectCol=day=>{
+    setSelected(s=>{
+      const ns=new Set(s);
+      const all=employees.map(e=>sk(e.id,day)).every(k=>ns.has(k));
+      employees.forEach(e=>all?ns.delete(sk(e.id,day)):ns.add(sk(e.id,day)));
+      return ns;
+    });
+  };
+  const applyBulk=val=>{
+    if(!selected.size)return;
+    const t=val.trim();
+    setData(dt=>{
+      let ns={...dt.shifts};
+      selected.forEach(k=>{
+        const[eid,day]=k.split('-');
+        const dkey=dk(year,month,parseInt(day));
+        ns[dkey]={...(ns[dkey]||{}),[eid]:t};
+      });
+      return{...dt,shifts:ns};
+    });
+    flash(`${selected.size}件を設定しました`);
+    setSelected(new Set());setBulkInput('');
+  };
+  const exitBulk=()=>{setBulkMode(false);setSelected(new Set());setBulkInput('')};
+
+  // PDF出力
+  const exportPDF=async()=>{
+    flash('PDF生成中...');
+    const{jsPDF}=window.jspdf;
+    const table=document.querySelector('.stbl');
+    if(!table)return;
+    try{
+      const canvas=await html2canvas(table,{scale:2,useCORS:true,backgroundColor:'#ffffff',scrollX:0,scrollY:0,windowWidth:table.scrollWidth,width:table.scrollWidth});
+      const imgW=277;
+      const imgH=(canvas.height/canvas.width)*imgW;
+      const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+      doc.setFontSize(14);
+      doc.text(`${year}/${String(month+1).padStart(2,'0')}`,10,9);
+      doc.addImage(canvas.toDataURL('image/png'),'PNG',10,13,imgW,Math.min(imgH,181));
+      doc.save(`shift_${year}-${String(month+1).padStart(2,'0')}.pdf`);
+      flash('PDFを出力しました');
+    }catch{flash('PDF生成に失敗しました')}
+  };
+
+  // CSV出力
+  const exportCSV=()=>{
+    const n=dim(year,month);
+    const hdr=['名前',...Array.from({length:n},(_,i)=>`${i+1}日`),'出勤日数','総時間(h)'];
+    const rows=employees.map(emp=>{
+      const cells=Array.from({length:n},(_,i)=>getS(emp.id,i+1));
+      const wd=cells.filter(c=>!!c).length;
+      const th=cells.reduce((a,c)=>a+parseHours(c),0);
+      return[emp.name,...cells,wd,th];
+    });
+    const csv=[hdr,...rows].map(r=>r.join(',')).join('\n');
+    const b=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+    const u=URL.createObjectURL(b);
+    const a=document.createElement('a');a.href=u;a.download=`シフト_${year}年${month+1}月.csv`;a.click();
+    URL.revokeObjectURL(u);flash('CSVを出力しました');
+  };
+
+  const n=dim(year,month);
+  const cellStyle=val=>{if(!val)return{};const p=presets.find(p=>p.label===val);return p?{background:p.bg,color:p.fg}:{background:'#f7fafc',color:'#4a5568'}};
+  const empSum=employees.map(emp=>{let wd=0,th=0;for(let d=1;d<=n;d++){const s=getS(emp.id,d);if(s)wd++;th+=parseHours(s)}return{id:emp.id,wd,th}});
+  const daySum=Array.from({length:n},(_,i)=>employees.filter(emp=>!!getS(emp.id,i+1)).length);
+  const syncColor=sync==='ok'?'#68d391':sync==='saving'?'#f6ad55':'#fc8181';
+  const syncLabel=sync==='ok'?'同期済み':sync==='saving'?'保存中...':'エラー';
+
+  return(
+    <div>
+      <header className="hdr">
+        <div className="hdr-title">📋 シフト管理</div>
+        <div className="month-nav">
+          <button className="nbtn" onClick={prevM}>‹</button>
+          <span className="month-lbl">{year}年 {month+1}月</span>
+          <button className="nbtn" onClick={nextM}>›</button>
+          <button className="btn btn-ghost btn-sm" onClick={()=>{setYear(now.getFullYear());setMonth(now.getMonth())}}>今月</button>
+        </div>
+        <div className="hdr-sp"/>
+        <span style={{fontSize:11,opacity:.75,display:'flex',alignItems:'center',gap:3}}>
+          <span className="sync-dot" style={{background:syncColor}}/>{syncLabel}
+        </span>
+        <button className={`btn btn-bulk btn-sm${bulkMode?' active':''}`} onClick={()=>bulkMode?exitBulk():setBulkMode(true)}>
+          {bulkMode?`☑ ${selected.size}件選択中`:'☑ まとめて入力'}
+        </button>
+        <button className="btn btn-ghost btn-sm" onClick={exportPDF}>📄 PDF</button>
+        <button className="btn btn-ghost btn-sm" onClick={exportCSV}>⬇ CSV</button>
+      </header>
+
+      <div className="preset-bar">
+        <span style={{fontSize:11,fontWeight:600,color:'#718096',whiteSpace:'nowrap'}}>シフト種別：</span>
+        {presets.map(p=>(
+          <span key={p.id} className="preset-chip" style={{background:p.bg,color:p.fg,borderColor:p.fg+'44'}}>{p.label}</span>
+        ))}
+        <span className="preset-link" onClick={()=>setPresetMod(true)}>⚙ プリセット編集</span>
+      </div>
+
+      <div className="main">
+        <table className="stbl">
+          <thead>
+            <tr>
+              <th className="th-name">スタッフ</th>
+              {Array.from({length:n},(_,i)=>{
+                const d=i+1,dow=new Date(year,month,d).getDay(),hol=isHol(year,month,d);
+                const isToday=year===now.getFullYear()&&month===now.getMonth()&&d===now.getDate();
+                const colSel=bulkMode&&employees.every(e=>selected.has(sk(e.id,d)));
+                const cls=`th-d${dow===0||hol?' sun':dow===6?' sat':''}${isToday?' today-h':''}${colSel?' col-sel':''}`;
+                return(
+                  <th key={d} className={cls} onClick={bulkMode?()=>selectCol(d):undefined} style={bulkMode?{cursor:'pointer'}:{}}>
+                    <div className="num">{d}</div>
+                    <div className="dow">{WD[dow]}</div>
+                    {isToday&&<div className="today-dot"/>}
+                  </th>
+                );
+              })}
+              <th className="th-sum">合計</th>
+            </tr>
+          </thead>
+          <tbody>
+            {employees.map(emp=>{
+              const sm=empSum.find(s=>s.id===emp.id);
+              return(
+                <tr key={emp.id}>
+                  <td className="td-name" onClick={bulkMode?()=>selectRow(emp.id):()=>setEmpMod({id:emp.id,name:emp.name,color:emp.color})}>
+                    <div className="name-inner">
+                      <div className="ndot" style={{background:emp.color}}/>
+                      {emp.name}
+                      {bulkMode&&<span className="row-sel-icon">▶全選択</span>}
+                    </div>
+                  </td>
+                  {Array.from({length:n},(_,i)=>{
+                    const d=i+1,dow=new Date(year,month,d).getDay(),hol=isHol(year,month,d);
+                    const val=getS(emp.id,d),isSel=selected.has(sk(emp.id,d));
+                    const cls=`td-s${dow===6?' sat-bg':dow===0||hol?' sun-bg':''}${isSel?' sel':''}`;
+                    return(
+                      <td key={d} className={cls} onClick={bulkMode?()=>toggleSel(emp.id,d):e=>openPopup(emp.id,d,e)}>
+                        <div className="cell-val" style={isSel?{}:cellStyle(val)}>{val}</div>
+                      </td>
+                    );
+                  })}
+                  <td className="td-sum">
+                    <div className="sum-h">{sm?.th||0}h</div>
+                    <div className="sum-d">{sm?.wd||0}日</div>
+                  </td>
+                </tr>
+              );
+            })}
+            <tr className="tr-count">
+              <td className="td-name" style={{fontSize:11,color:'#718096',fontWeight:600,cursor:'default'}}>出勤人数</td>
+              {daySum.map((cnt,i)=>{
+                const dow=new Date(year,month,i+1).getDay(),hol=isHol(year,month,i+1);
+                return(
+                  <td key={i} className={dow===6?'sat-bg':dow===0||hol?'sun-bg':''} style={{textAlign:'center'}}>
+                    {cnt>0?<span style={{color:cnt>=4?'#276749':cnt>=2?'#744210':'#c53030'}}>{cnt}</span>:<span style={{color:'#cbd5e0'}}>-</span>}
+                  </td>
+                );
+              })}
+              <td/>
+            </tr>
+            <tr className="tr-add">
+              <td colSpan={n+2}>
+                <button className="add-btn" onClick={()=>setEmpMod('add')}>＋ スタッフを追加</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {popup&&popup.mobile&&(
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.45)',zIndex:299}} onClick={()=>setPopup(null)}/>
+      )}
+      {popup&&(
+        <div ref={popRef} className="popup" style={popup.mobile?{}:{left:popup.x,top:popup.y}}>
+          <div className="popup-hdr">
+            <span>{employees.find(e=>e.id===popup.eid)?.name} / {popup.day}日</span>
+            <span className="popup-close" onClick={()=>setPopup(null)}>×</span>
+          </div>
+          <div className="popup-input-row">
+            <input ref={inputRef} className="popup-input" value={inputVal}
+              onChange={e=>setInputVal(e.target.value)}
+              onKeyDown={e=>{if(e.key==='Enter')applyVal(inputVal);if(e.key==='Escape')setPopup(null)}}
+              placeholder="例: 9-14, KC, MTG"/>
+            <button className="popup-set" onClick={()=>applyVal(inputVal)}>決定</button>
+          </div>
+          <div className="presets-label">プリセット</div>
+          <div className="presets-grid">
+            {presets.map(p=>{
+              const cur=getS(popup.eid,popup.day);
+              return(
+                <div key={p.id} className={`p-chip${cur===p.label?' active':''}`}
+                  style={{background:p.bg,color:p.fg,borderColor:cur===p.label?p.fg:p.bg}}
+                  onClick={()=>applyVal(p.label)}>{p.label}</div>
+              );
+            })}
+            <div className="p-clear" onClick={()=>applyVal('')}>クリア</div>
+          </div>
+          {inputVal&&parseHours(inputVal)>0&&(
+            <div style={{fontSize:11,color:'#718096',marginTop:7,textAlign:'right'}}>⏱ 実働 {parseHours(inputVal)}h</div>
+          )}
+        </div>
+      )}
+
+      {empMod&&(
+        <EmpModal
+          mode={empMod==='add'?'add':'edit'}
+          init={empMod==='add'?null:empMod}
+          onSave={(name,color)=>{empMod==='add'?addEmp(name,color):updEmp(empMod.id,name,color);setEmpMod(null)}}
+          onDel={empMod!=='add'?()=>{delEmp(empMod.id);setEmpMod(null)}:null}
+          onClose={()=>setEmpMod(null)}
+        />
+      )}
+
+      {presetMod&&(
+        <PresetModal
+          presets={presets} nextPid={nextPid}
+          onSave={(ps,np)=>{setData(dt=>({...dt,presets:ps,nextPid:np}));setPresetMod(false);flash('プリセットを保存しました')}}
+          onClose={()=>setPresetMod(false)}
+        />
+      )}
+
+      {bulkMode&&(
+        <div className="bulk-bar">
+          <div className="bulk-count">選択中：<span>{selected.size}</span>件</div>
+          <div className="bulk-chips">
+            {presets.map(p=>(
+              <div key={p.id} className="bulk-chip" style={{background:p.bg,color:p.fg,borderColor:p.fg+'44'}}
+                onClick={()=>applyBulk(p.label)}>{p.label}</div>
+            ))}
+            <div className="bulk-chip" style={{background:'#4a5568',color:'#e2e8f0'}} onClick={()=>applyBulk('')}>クリア</div>
+          </div>
+          <input className="bulk-input" value={bulkInput} onChange={e=>setBulkInput(e.target.value)}
+            onKeyDown={e=>e.key==='Enter'&&applyBulk(bulkInput)} placeholder="直接入力"/>
+          <button className="bulk-set" onClick={()=>applyBulk(bulkInput)}>適用</button>
+          <button className="bulk-cancel" onClick={exitBulk}>終了</button>
+        </div>
+      )}
+
+      {toast&&<div className="toast">{toast}</div>}
+    </div>
+  );
+}
+
+function EmpModal({mode,init,onSave,onDel,onClose}){
+  const[name,setName]=useState(init?.name||'');
+  const[color,setColor]=useState(init?.color||EMP_COLORS[0]);
+  return(
+    <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal">
+        <h2>{mode==='add'?'スタッフを追加':'スタッフを編集'}</h2>
+        <form onSubmit={e=>{e.preventDefault();if(name.trim())onSave(name.trim(),color)}}>
+          <div className="fg"><label>名前</label>
+            <input className="fi" value={name} onChange={e=>setName(e.target.value)} placeholder="例: 山田 太郎" autoFocus/>
+          </div>
+          <div className="fg"><label>カラー</label>
+            <div className="color-row">{EMP_COLORS.map(c=><div key={c} className={`csw${color===c?' sel':''}`} style={{background:c}} onClick={()=>setColor(c)}/>)}</div>
+          </div>
+          <div className="mact">
+            {onDel&&<button type="button" className="btn btn-red btn-sm" onClick={onDel}>削除</button>}
+            <div style={{flex:1}}/>
+            <button type="button" className="btn btn-gray btn-sm" onClick={onClose}>キャンセル</button>
+            <button type="submit" className="btn btn-blue btn-sm">{mode==='add'?'追加':'保存'}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function PresetModal({presets,nextPid,onSave,onClose}){
+  const[ps,setPs]=useState(presets.map(p=>({...p})));
+  const[nid,setNid]=useState(nextPid);
+  const updP=(id,f,v)=>setPs(list=>list.map(p=>p.id===id?{...p,[f]:v}:p));
+  const addP=()=>{setPs(list=>[...list,{id:nid,label:'',bg:CHIP_COLORS[0].bg,fg:CHIP_COLORS[0].fg}]);setNid(n=>n+1)};
+  const delP=id=>setPs(list=>list.filter(p=>p.id!==id));
+  return(
+    <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal" style={{width:420}}>
+        <h2>⚙ プリセット編集</h2>
+        <div className="preset-list">
+          {ps.map(p=>(
+            <div key={p.id} className="preset-row">
+              <input className="fi" style={{width:80,flexShrink:0}} value={p.label} onChange={e=>updP(p.id,'label',e.target.value)} placeholder="9-14"/>
+              <div className="color-mini">
+                {CHIP_COLORS.map((c,i)=>(
+                  <div key={i} className={`csw-mini${p.bg===c.bg?' sel':''}`}
+                    style={{background:c.bg,borderColor:p.bg===c.bg?c.fg:'transparent'}}
+                    onClick={()=>{updP(p.id,'bg',c.bg);updP(p.id,'fg',c.fg)}}/>
+                ))}
+              </div>
+              <span className="preset-chip" style={{background:p.bg,color:p.fg,borderColor:p.fg+'44',fontSize:12,padding:'2px 7px'}}>{p.label||'例'}</span>
+              <button className="btn-xs btn-red" onClick={()=>delP(p.id)}>✕</button>
+            </div>
+          ))}
+        </div>
+        <div style={{marginTop:10}}><button className="btn btn-gray btn-sm" onClick={addP}>＋ 追加</button></div>
+        <div className="mact">
+          <div style={{flex:1}}/>
+          <button className="btn btn-gray btn-sm" onClick={onClose}>キャンセル</button>
+          <button className="btn btn-blue btn-sm" onClick={()=>onSave(ps.filter(p=>p.label.trim()),nid)}>保存</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+<script>
+// 古いサービスワーカーを全削除
+if('serviceWorker'in navigator){
+  navigator.serviceWorker.getRegistrations().then(regs=>{
+    regs.forEach(r=>r.unregister());
+  });
+}
+</script>
+</body>
+</html>
