@@ -503,6 +503,19 @@ function App(){
               })}
               <td/>
             </tr>
+            <tr className="tr-count">
+              <td className="td-name" style={{fontSize:11,color:'#718096',fontWeight:600,cursor:'default'}}>人件費</td>
+              {daySum.map((h,i)=>{
+                const dow=new Date(year,month,i+1).getDay(),hol=isHol(year,month,i+1);
+                const cost=h*1200;
+                return(
+                  <td key={i} className={dow===6?'sat-bg':dow===0||hol?'sun-bg':''} style={{textAlign:'center'}}>
+                    {cost>0?<span style={{color:'#744210',fontWeight:700,fontSize:10}}>{cost>=10000?(cost/10000).toFixed(1)+'万':cost+'円'}</span>:<span style={{color:'#cbd5e0'}}>-</span>}
+                  </td>
+                );
+              })}
+              <td/>
+            </tr>
             <tr className="tr-add">
               <td colSpan={n+2}>
                 <button className="add-btn" onClick={()=>setEmpMod('add')}>＋ スタッフを追加</button>
