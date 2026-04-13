@@ -230,8 +230,6 @@ function App(){
   const [bulkMode,setBulkMode]=useState(false);
   const [selected,setSelected]=useState(new Set());
   const [bulkInput,setBulkInput]=useState('');
-  const [dragOver,setDragOver]=useState(null);
-  const dragSrc=useRef(null);
   const popRef=useRef(null);
   const inputRef=useRef(null);
   const saveTimer=useRef(null);
@@ -354,22 +352,16 @@ function App(){
   };
   const exitBulk=()=>{setBulkMode(false);setSelected(new Set());setBulkInput('')};
 
-  // ドラッグ並び替え
-  const onDragStart=(eid)=>{dragSrc.current=eid};
-  const onDragOver=(e,eid)=>{e.preventDefault();setDragOver(eid)};
-  const onDrop=(eid)=>{
-    if(!dragSrc.current||dragSrc.current===eid)return;
+  // 並び替え
+  const moveEmp=(idx,dir)=>{
     setData(dt=>{
       const emps=[...dt.employees];
-      const fi=emps.findIndex(e=>e.id===dragSrc.current);
-      const ti=emps.findIndex(e=>e.id===eid);
-      const [moved]=emps.splice(fi,1);
-      emps.splice(ti,0,moved);
+      const ti=idx+dir;
+      if(ti<0||ti>=emps.length)return dt;
+      [emps[idx],emps[ti]]=[emps[ti],emps[idx]];
       return{...dt,employees:emps};
     });
-    dragSrc.current=null;setDragOver(null);
   };
-  const onDragEnd=()=>{dragSrc.current=null;setDragOver(null)};
 
   // PDF出力
   const exportPDF=async()=>{
@@ -465,20 +457,20 @@ function App(){
             </tr>
           </thead>
           <tbody>
-            {employees.map(emp=>{
+            {employees.map((emp,idx)=>{
               const sm=empSum.find(s=>s.id===emp.id);
               return(
-                <tr key={emp.id} draggable={!bulkMode}
-                  onDragStart={()=>onDragStart(emp.id)}
-                  onDragOver={e=>onDragOver(e,emp.id)}
-                  onDrop={()=>onDrop(emp.id)}
-                  onDragEnd={onDragEnd}
-                  style={dragOver===emp.id?{outline:'2px solid #3182ce',outlineOffset:'-2px'}:{}}>
+                <tr key={emp.id}>
                   <td className="td-name" onClick={bulkMode?()=>selectRow(emp.id):()=>setEmpMod({id:emp.id,name:emp.name,color:emp.color})}>
                     <div className="name-inner">
                       <div className="ndot" style={{background:emp.color}}/>
                       {emp.name}
-                      {!bulkMode&&<span style={{opacity:.3,fontSize:10,marginLeft:'auto'}}>⠿</span>}
+                      {!bulkMode&&(
+                        <div style={{display:'flex',flexDirection:'column',marginLeft:'auto',gap:1}} onClick={e=>e.stopPropagation()}>
+                          <span style={{fontSize:9,cursor:'pointer',lineHeight:1,color:'#a0aec0',padding:'1px 3px'}} onClick={()=>moveEmp(idx,-1)}>▲</span>
+                          <span style={{fontSize:9,cursor:'pointer',lineHeight:1,color:'#a0aec0',padding:'1px 3px'}} onClick={()=>moveEmp(idx,1)}>▼</span>
+                        </div>
+                      )}
                       {bulkMode&&<span className="row-sel-icon">▶全選択</span>}
                     </div>
                   </td>
