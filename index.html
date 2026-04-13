@@ -370,7 +370,11 @@ function App(){
     const table=document.querySelector('.stbl');
     if(!table)return;
     try{
+      // 合計時間・人件費行を一時非表示
+      const hideRows=table.querySelectorAll('.tr-count');
+      hideRows.forEach(r=>r.style.display='none');
       const canvas=await html2canvas(table,{scale:2,useCORS:true,backgroundColor:'#ffffff',scrollX:0,scrollY:0,windowWidth:table.scrollWidth,width:table.scrollWidth});
+      hideRows.forEach(r=>r.style.display='');
       const imgW=277;
       const imgH=(canvas.height/canvas.width)*imgW;
       const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
