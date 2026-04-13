@@ -230,6 +230,8 @@ function App(){
   const [bulkMode,setBulkMode]=useState(false);
   const [selected,setSelected]=useState(new Set());
   const [bulkInput,setBulkInput]=useState('');
+  const [dragOver,setDragOver]=useState(null);
+  const dragSrc=useRef(null);
   const popRef=useRef(null);
   const inputRef=useRef(null);
   const saveTimer=useRef(null);
@@ -352,6 +354,23 @@ function App(){
   };
   const exitBulk=()=>{setBulkMode(false);setSelected(new Set());setBulkInput('')};
 
+  // ドラッグ並び替え
+  const onDragStart=(eid)=>{dragSrc.current=eid};
+  const onDragOver=(e,eid)=>{e.preventDefault();setDragOver(eid)};
+  const onDrop=(eid)=>{
+    if(!dragSrc.current||dragSrc.current===eid)return;
+    setData(dt=>{
+      const emps=[...dt.employees];
+      const fi=emps.findIndex(e=>e.id===dragSrc.current);
+      const ti=emps.findIndex(e=>e.id===eid);
+      const [moved]=emps.splice(fi,1);
+      emps.splice(ti,0,moved);
+      return{...dt,employees:emps};
+    });
+    dragSrc.current=null;setDragOver(null);
+  };
+  const onDragEnd=()=>{dragSrc.current=null;setDragOver(null)};
+
   // PDF出力
   const exportPDF=async()=>{
     flash('PDF生成中...');
@@ -449,11 +468,17 @@ function App(){
             {employees.map(emp=>{
               const sm=empSum.find(s=>s.id===emp.id);
               return(
-                <tr key={emp.id}>
+                <tr key={emp.id} draggable={!bulkMode}
+                  onDragStart={()=>onDragStart(emp.id)}
+                  onDragOver={e=>onDragOver(e,emp.id)}
+                  onDrop={()=>onDrop(emp.id)}
+                  onDragEnd={onDragEnd}
+                  style={dragOver===emp.id?{outline:'2px solid #3182ce',outlineOffset:'-2px'}:{}}>
                   <td className="td-name" onClick={bulkMode?()=>selectRow(emp.id):()=>setEmpMod({id:emp.id,name:emp.name,color:emp.color})}>
                     <div className="name-inner">
                       <div className="ndot" style={{background:emp.color}}/>
                       {emp.name}
+                      {!bulkMode&&<span style={{opacity:.3,fontSize:10,marginLeft:'auto'}}>⠿</span>}
                       {bulkMode&&<span className="row-sel-icon">▶全選択</span>}
                     </div>
                   </td>
