@@ -426,6 +426,7 @@ function App(){
         <span style={{fontSize:11,opacity:.75,display:'flex',alignItems:'center',gap:3}}>
           <span className="sync-dot" style={{background:syncColor}}/>{syncLabel}
         </span>
+        <button className="btn btn-ghost btn-sm" onClick={()=>{if(data){setSync('saving');fbSet(data).then(()=>{setSync('ok');flash('保存しました')}).catch(()=>setSync('error'))}}}>💾 保存</button>
         <button className={`btn btn-bulk btn-sm${bulkMode?' active':''}`} onClick={()=>bulkMode?exitBulk():setBulkMode(true)}>
           {bulkMode?`☑ ${selected.size}件選択中`:'☑ まとめて入力'}
         </button>
