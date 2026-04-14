@@ -371,7 +371,7 @@ function App(){
     if(!table)return;
     try{
       // 合計時間・人件費・人数行・スタッフ追加行を一時非表示
-      const hideRows=table.querySelectorAll('.tr-count,.tr-add');
+      const hideRows=table.querySelectorAll('.tr-summary,.tr-add');
       hideRows.forEach(r=>r.style.display='none');
       const canvas=await html2canvas(table,{scale:2,useCORS:true,backgroundColor:'#ffffff',scrollX:0,scrollY:0,windowWidth:table.scrollWidth,width:table.scrollWidth});
       hideRows.forEach(r=>r.style.display='');
@@ -509,7 +509,7 @@ function App(){
               })}
               <td/>
             </tr>
-            <tr className="tr-count">
+            <tr className="tr-count tr-summary">
               <td className="td-name" style={{fontSize:11,color:'#718096',fontWeight:600,cursor:'default'}}>合計時間</td>
               {daySum.map((h,i)=>{
                 const dow=new Date(year,month,i+1).getDay(),hol=isHol(year,month,i+1);
@@ -521,7 +521,7 @@ function App(){
               })}
               <td/>
             </tr>
-            <tr className="tr-count">
+            <tr className="tr-count tr-summary">
               <td className="td-name" style={{fontSize:11,color:'#718096',fontWeight:600,cursor:'default'}}>人件費</td>
               {daySum.map((h,i)=>{
                 const dow=new Date(year,month,i+1).getDay(),hol=isHol(year,month,i+1);
