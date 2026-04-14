@@ -117,6 +117,7 @@
     .color-mini{display:flex;gap:4px;flex-wrap:wrap}
     .csw-mini{width:18px;height:18px;border-radius:50%;cursor:pointer;border:2px solid transparent}
     .csw-mini.sel{border-color:#1a202c}
+    .csw-mini-tp{background:repeating-linear-gradient(45deg,#ccc 0px,#ccc 4px,#fff 4px,#fff 8px);border:2px solid #ccc}
 
     /* 一括入力バー */
     .bulk-bar{position:fixed;bottom:0;left:0;right:0;background:#1a202c;color:#fff;padding:10px 16px;display:flex;align-items:center;gap:8px;z-index:500;box-shadow:0 -4px 16px rgba(0,0,0,.3);flex-wrap:wrap}
@@ -190,6 +191,8 @@ const CHIP_COLORS=[
   {bg:'#bee3f8',fg:'#2b6cb0'},{bg:'#c6f6d5',fg:'#276749'},{bg:'#fefcbf',fg:'#744210'},
   {bg:'#fed7d7',fg:'#9b2c2c'},{bg:'#e9d8fd',fg:'#553c9a'},{bg:'#fcd5b0',fg:'#7b341e'},
   {bg:'#e2e8f0',fg:'#4a5568'},{bg:'#b2f5ea',fg:'#234e52'},
+  {bg:'transparent',fg:'#FF0000'},
+  {bg:'transparent',fg:'#2b6cb0'},
 ];
 const WD=['日','月','火','水','木','金','土'];
 
@@ -661,9 +664,13 @@ function PresetModal({presets,nextPid,onSave,onClose}){
               <input className="fi" style={{width:80,flexShrink:0}} value={p.label} onChange={e=>updP(p.id,'label',e.target.value)} placeholder="9-14"/>
               <div className="color-mini">
                 {CHIP_COLORS.map((c,i)=>(
-                  <div key={i} className={`csw-mini${p.bg===c.bg?' sel':''}`}
-                    style={{background:c.bg,borderColor:p.bg===c.bg?c.fg:'transparent'}}
-                    onClick={()=>{updP(p.id,'bg',c.bg);updP(p.id,'fg',c.fg)}}/>
+                  c.bg==='transparent'
+                  ?<div key={i} className={`csw-mini csw-mini-tp${p.bg===c.bg&&p.fg===c.fg?' sel':''}`}
+                      style={p.bg===c.bg&&p.fg===c.fg?{borderColor:c.fg}:{}}
+                      onClick={()=>{updP(p.id,'bg',c.bg);updP(p.id,'fg',c.fg)}}/>
+                  :<div key={i} className={`csw-mini${p.bg===c.bg?' sel':''}`}
+                      style={{background:c.bg,borderColor:p.bg===c.bg?c.fg:'transparent'}}
+                      onClick={()=>{updP(p.id,'bg',c.bg);updP(p.id,'fg',c.fg)}}/>
                 ))}
               </div>
               <span className="preset-chip" style={{background:p.bg,color:p.fg,borderColor:p.fg+'44',fontSize:12,padding:'2px 7px'}}>{p.label||'例'}</span>
