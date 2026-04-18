@@ -446,12 +446,12 @@ function App(){
         ))}
         <span className="preset-link" onClick={()=>setPresetMod(true)}>⚙ プリセット編集</span>
       </div>
-      <div style={{display:'flex',alignItems:'center',gap:6,padding:'6px 14px',background:'#fff',borderBottom:'1px solid #e2e8f0',fontSize:11,color:'#718096',fontWeight:600}}>
+      <div style={{display:'flex',alignItems:'center',gap:6,padding:'6px 14px',background:'#fff',borderBottom:'1px solid #e2e8f0',fontSize:11,color:'#4a5568',fontWeight:600}}>
         <span>表示倍率:</span>
-        <button className="btn btn-ghost btn-sm" style={{padding:'3px 10px',minWidth:30,fontSize:14}} onClick={()=>setZoom(z=>Math.max(0.5,Math.round((z-0.1)*10)/10))}>－</button>
-        <span style={{minWidth:44,textAlign:'center',fontSize:12}}>{Math.round(zoom*100)}%</span>
-        <button className="btn btn-ghost btn-sm" style={{padding:'3px 10px',minWidth:30,fontSize:14}} onClick={()=>setZoom(z=>Math.min(2,Math.round((z+0.1)*10)/10))}>＋</button>
-        <button className="btn btn-ghost btn-sm" style={{padding:'3px 8px'}} onClick={()=>setZoom(1)}>100%</button>
+        <button style={{padding:'4px 12px',minWidth:32,fontSize:16,fontWeight:700,background:'#e2e8f0',color:'#2d3748',border:'1px solid #cbd5e0',borderRadius:6,cursor:'pointer'}} onClick={()=>setZoom(z=>Math.max(0.5,Math.round((z-0.1)*10)/10))}>－</button>
+        <span style={{minWidth:48,textAlign:'center',fontSize:13,fontWeight:700,color:'#2d3748'}}>{Math.round(zoom*100)}%</span>
+        <button style={{padding:'4px 12px',minWidth:32,fontSize:16,fontWeight:700,background:'#e2e8f0',color:'#2d3748',border:'1px solid #cbd5e0',borderRadius:6,cursor:'pointer'}} onClick={()=>setZoom(z=>Math.min(2,Math.round((z+0.1)*10)/10))}>＋</button>
+        <button style={{padding:'4px 10px',fontSize:11,fontWeight:600,background:'#edf2f7',color:'#4a5568',border:'1px solid #cbd5e0',borderRadius:6,cursor:'pointer'}} onClick={()=>setZoom(1)}>リセット</button>
       </div>
 
       <div className="main">
