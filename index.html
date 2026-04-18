@@ -445,12 +445,13 @@ function App(){
           <span key={p.id} className="preset-chip" style={{background:p.bg,color:p.fg,borderColor:p.fg+'44'}}>{p.label}</span>
         ))}
         <span className="preset-link" onClick={()=>setPresetMod(true)}>⚙ プリセット編集</span>
-        <span style={{marginLeft:'auto',display:'flex',alignItems:'center',gap:4,fontSize:11,color:'#718096',fontWeight:600,whiteSpace:'nowrap'}}>
-          <button className="btn btn-ghost btn-sm" style={{padding:'3px 8px',minWidth:26}} onClick={()=>setZoom(z=>Math.max(0.5,Math.round((z-0.1)*10)/10))}>－</button>
-          <span style={{minWidth:36,textAlign:'center'}}>{Math.round(zoom*100)}%</span>
-          <button className="btn btn-ghost btn-sm" style={{padding:'3px 8px',minWidth:26}} onClick={()=>setZoom(z=>Math.min(2,Math.round((z+0.1)*10)/10))}>＋</button>
-          <button className="btn btn-ghost btn-sm" style={{padding:'3px 6px'}} onClick={()=>setZoom(1)}>⟲</button>
-        </span>
+      </div>
+      <div style={{display:'flex',alignItems:'center',gap:6,padding:'6px 14px',background:'#fff',borderBottom:'1px solid #e2e8f0',fontSize:11,color:'#718096',fontWeight:600}}>
+        <span>表示倍率:</span>
+        <button className="btn btn-ghost btn-sm" style={{padding:'3px 10px',minWidth:30,fontSize:14}} onClick={()=>setZoom(z=>Math.max(0.5,Math.round((z-0.1)*10)/10))}>－</button>
+        <span style={{minWidth:44,textAlign:'center',fontSize:12}}>{Math.round(zoom*100)}%</span>
+        <button className="btn btn-ghost btn-sm" style={{padding:'3px 10px',minWidth:30,fontSize:14}} onClick={()=>setZoom(z=>Math.min(2,Math.round((z+0.1)*10)/10))}>＋</button>
+        <button className="btn btn-ghost btn-sm" style={{padding:'3px 8px'}} onClick={()=>setZoom(1)}>100%</button>
       </div>
 
       <div className="main">
