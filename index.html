@@ -620,11 +620,6 @@ function App(){
             <span>まとめて入力 / 選択中：<b>{selected.size}</b>件</span>
             <span className="popup-close" onClick={exitBulk}>×</span>
           </div>
-          <div className="popup-input-row">
-            <input className="popup-input" value={bulkInput} onChange={e=>setBulkInput(e.target.value)}
-              onKeyDown={e=>e.key==='Enter'&&applyBulk(bulkInput)} placeholder="例: 9-14, KC, MTG"/>
-            <button className="popup-set" onClick={()=>applyBulk(bulkInput)}>適用</button>
-          </div>
           <div className="presets-label">プリセット</div>
           <div className="presets-grid">
             {presets.map(p=>(
