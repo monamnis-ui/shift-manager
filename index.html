@@ -460,7 +460,7 @@ function App(){
         <button className="zbtn zbtn-r" onClick={()=>setZoom(1)}>リセット</button>
       </div>
 
-      <div className="main">
+      <div className="main" style={bulkMode?{paddingBottom:'70vh'}:{}}>
         <table className="stbl" style={{zoom:zoom}}>
           <thead>
             <tr>
