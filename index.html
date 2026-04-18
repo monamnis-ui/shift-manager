@@ -125,20 +125,16 @@
     .csw-mini-tp{background:repeating-linear-gradient(45deg,#ccc 0px,#ccc 4px,#fff 4px,#fff 8px);border:2px solid #ccc}
 
     /* 一括入力バー */
-    .bulk-bar{position:fixed;bottom:0;left:0;right:0;background:#1a202c;color:#fff;padding:10px 16px;display:flex;align-items:center;gap:8px;z-index:500;box-shadow:0 -4px 16px rgba(0,0,0,.3);flex-wrap:wrap}
-    .bulk-count{font-size:13px;font-weight:700;white-space:nowrap}
-    .bulk-count span{color:#fcd34d}
-    .bulk-chips{display:flex;gap:5px;flex-wrap:wrap;flex:1}
-    .bulk-chip{padding:5px 10px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid transparent}
-    .bulk-input{padding:5px 8px;border:1.5px solid #4a5568;border-radius:6px;background:#2d3748;color:#fff;font-size:12px;width:80px;outline:none}
-    .bulk-set{padding:5px 12px;background:#f59e0b;color:#1a202c;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer}
-    .bulk-cancel{padding:5px 10px;background:#c53030;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer}
+    .bulk-sheet{position:fixed;left:0;right:0;bottom:0;background:#fff;border-radius:16px 16px 0 0;padding:14px;z-index:500;box-shadow:0 -4px 24px rgba(0,0,0,.18);max-height:70vh;overflow-y:auto}
+    .bulk-hdr{font-size:13px;font-weight:700;color:#2d3748;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+    .bulk-hdr b{color:#d97706;margin:0 2px}
+    .bulk-cancel{padding:6px 16px;background:#c53030;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer}
 
     .toast{position:fixed;bottom:20px;right:20px;background:#1a202c;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;z-index:400;animation:su .25s ease;box-shadow:0 4px 12px rgba(0,0,0,.2)}
     @keyframes su{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
     .loading{display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:12px;color:#718096;font-size:14px}
 
-    @media print{.hdr .btn,.add-btn,.preset-bar,.popup,.bulk-bar,.toast{display:none!important}.main{padding:4px}body{background:#fff}}
+    @media print{.hdr .btn,.add-btn,.preset-bar,.popup,.bulk-sheet,.toast{display:none!important}.main{padding:4px}body{background:#fff}}
 
     /* スマホ対応 */
     .main{-webkit-overflow-scrolling:touch}
@@ -614,19 +610,27 @@ function App(){
       )}
 
       {bulkMode&&(
-        <div className="bulk-bar">
-          <div className="bulk-count">選択中：<span>{selected.size}</span>件</div>
-          <div className="bulk-chips">
+        <div className="bulk-sheet">
+          <div className="bulk-hdr">
+            <span>まとめて入力 / 選択中：<b>{selected.size}</b>件</span>
+            <span className="popup-close" onClick={exitBulk}>×</span>
+          </div>
+          <div className="popup-input-row">
+            <input className="popup-input" value={bulkInput} onChange={e=>setBulkInput(e.target.value)}
+              onKeyDown={e=>e.key==='Enter'&&applyBulk(bulkInput)} placeholder="例: 9-14, KC, MTG"/>
+            <button className="popup-set" onClick={()=>applyBulk(bulkInput)}>適用</button>
+          </div>
+          <div className="presets-label">プリセット</div>
+          <div className="presets-grid">
             {presets.map(p=>(
-              <div key={p.id} className="bulk-chip" style={{background:p.bg,color:p.fg,borderColor:p.fg+'44'}}
+              <div key={p.id} className="p-chip" style={{background:p.bg,color:p.fg,borderColor:p.bg}}
                 onClick={()=>applyBulk(p.label)}>{p.label}</div>
             ))}
-            <div className="bulk-chip" style={{background:'#4a5568',color:'#e2e8f0'}} onClick={()=>applyBulk('')}>クリア</div>
+            <div className="p-clear" onClick={()=>applyBulk('')}>クリア</div>
           </div>
-          <input className="bulk-input" value={bulkInput} onChange={e=>setBulkInput(e.target.value)}
-            onKeyDown={e=>e.key==='Enter'&&applyBulk(bulkInput)} placeholder="直接入力"/>
-          <button className="bulk-set" onClick={()=>applyBulk(bulkInput)}>適用</button>
-          <button className="bulk-cancel" onClick={exitBulk}>終了</button>
+          <div style={{marginTop:10,textAlign:'right'}}>
+            <button className="bulk-cancel" onClick={exitBulk}>終了</button>
+          </div>
         </div>
       )}
 
