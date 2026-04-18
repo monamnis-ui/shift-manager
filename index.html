@@ -125,9 +125,14 @@
     .csw-mini-tp{background:repeating-linear-gradient(45deg,#ccc 0px,#ccc 4px,#fff 4px,#fff 8px);border:2px solid #ccc}
 
     /* 一括入力バー */
-    .bulk-sheet{position:fixed;left:0;right:0;bottom:0;background:#fff;border-radius:16px 16px 0 0;padding:14px;z-index:500;box-shadow:0 -4px 24px rgba(0,0,0,.18);max-height:70vh;overflow-y:auto}
-    .bulk-hdr{font-size:13px;font-weight:700;color:#2d3748;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
-    .bulk-hdr b{color:#d97706;margin:0 2px}
+    .bulk-sheet{position:fixed;left:0;right:0;bottom:0;background:#1a202c;color:#fff;border-radius:16px 16px 0 0;padding:14px;z-index:500;box-shadow:0 -4px 24px rgba(0,0,0,.3);max-height:70vh;overflow-y:auto}
+    .bulk-hdr{font-size:13px;font-weight:700;color:#fff;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+    .bulk-hdr b{color:#fcd34d;margin:0 2px}
+    .bulk-sheet .popup-close{color:#a0aec0}
+    .bulk-sheet .popup-input{background:#2d3748;color:#fff;border-color:#4a5568}
+    .bulk-sheet .popup-input::placeholder{color:#718096}
+    .bulk-sheet .presets-label{color:#a0aec0}
+    .bulk-sheet .p-clear{background:#2d3748;color:#cbd5e0;border-color:#4a5568}
     .bulk-cancel{padding:6px 16px;background:#c53030;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer}
 
     .toast{position:fixed;bottom:20px;right:20px;background:#1a202c;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;z-index:400;animation:su .25s ease;box-shadow:0 4px 12px rgba(0,0,0,.2)}
