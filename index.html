@@ -382,9 +382,9 @@ function App(){
     clone.querySelectorAll('.row-sort-icon,.row-sel-icon').forEach(i=>i.style.display='none');
     clone.style.cssText='border-collapse:collapse;background:#fff;white-space:nowrap;overflow:visible;display:table;table-layout:auto';
     const wrap=document.createElement('div');
-    wrap.style.cssText='position:absolute;left:-99999px;top:0;background:#fff;padding:10px;width:5000px;overflow:visible';
+    wrap.style.cssText='position:absolute;left:-99999px;top:0;background:#fff;padding:0;width:5000px;overflow:visible';
     const inner=document.createElement('div');
-    inner.style.cssText='display:inline-block;background:#fff;padding:5px';
+    inner.style.cssText='display:inline-block;background:#fff;padding:0;margin:0';
     inner.appendChild(clone);
     wrap.appendChild(inner);
     document.body.appendChild(wrap);
