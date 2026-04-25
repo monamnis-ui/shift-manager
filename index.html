@@ -372,23 +372,22 @@ function App(){
   const exportPDF=async()=>{
     flash('PDF生成中...');
     const{jsPDF}=window.jspdf;
-    const table=document.querySelector('.stbl');
-    const main=document.querySelector('.main');
-    if(!table)return;
+    const orig=document.querySelector('.stbl');
+    if(!orig)return;
+    // tableをクローンして画面外に配置してキャプチャ
+    const clone=orig.cloneNode(true);
+    clone.querySelectorAll('.tr-summary,.tr-add').forEach(r=>r.remove());
+    clone.querySelectorAll('.td-name,.th-name').forEach(t=>{t.style.position='static'});
+    clone.style.overflow='visible';
+    const wrap=document.createElement('div');
+    wrap.style.cssText='position:fixed;left:-99999px;top:0;background:#fff;padding:10px;width:auto';
+    wrap.appendChild(clone);
+    document.body.appendChild(wrap);
     try{
-      // 合計時間・人件費行・スタッフ追加行を一時非表示、stickyを解除
-      const hideRows=table.querySelectorAll('.tr-summary,.tr-add');
-      hideRows.forEach(r=>r.style.display='none');
-      const stickyTds=table.querySelectorAll('.td-name,.th-name');
-      stickyTds.forEach(t=>{t.dataset._pos=t.style.position;t.style.position='static'});
-      const mainOverflow=main?main.style.overflowX:'';
-      if(main)main.style.overflowX='visible';
-      const fullW=table.scrollWidth;
-      const fullH=table.scrollHeight;
-      const canvas=await html2canvas(table,{scale:2,useCORS:true,backgroundColor:'#ffffff',scrollX:0,scrollY:0,windowWidth:fullW+50,width:fullW,height:fullH});
-      hideRows.forEach(r=>r.style.display='');
-      stickyTds.forEach(t=>{t.style.position=t.dataset._pos||'';delete t.dataset._pos});
-      if(main)main.style.overflowX=mainOverflow;
+      await new Promise(r=>setTimeout(r,100));
+      const fullW=clone.scrollWidth;
+      const fullH=clone.scrollHeight;
+      const canvas=await html2canvas(clone,{scale:2,useCORS:true,backgroundColor:'#ffffff',windowWidth:fullW+200,width:fullW,height:fullH});
       const imgW=277;
       const imgH=(canvas.height/canvas.width)*imgW;
       const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
@@ -398,6 +397,7 @@ function App(){
       doc.save(`shift_${year}-${String(month+1).padStart(2,'0')}.pdf`);
       flash('PDFを出力しました');
     }catch{flash('PDF生成に失敗しました')}
+    finally{document.body.removeChild(wrap)}
   };
 
   // CSV出力
