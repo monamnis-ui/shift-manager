@@ -379,11 +379,11 @@ function App(){
     clone.querySelectorAll('.tr-summary,.tr-add').forEach(r=>r.remove());
     clone.querySelectorAll('.td-name,.th-name').forEach(t=>{t.style.position='static';t.style.left='auto'});
     // 全セル縮小
-    clone.querySelectorAll('td,th').forEach(c=>{c.style.padding='0px 1px';c.style.fontSize='7px';c.style.minWidth='auto';c.style.maxWidth='none';c.style.lineHeight='1.1'});
-    clone.querySelectorAll('span,div').forEach(s=>{s.style.fontSize='7px';s.style.padding='0';s.style.lineHeight='1.1'});
+    clone.querySelectorAll('td,th').forEach(c=>{c.style.padding='0';c.style.fontSize='6px';c.style.minWidth='auto';c.style.maxWidth='none';c.style.lineHeight='1'});
+    clone.querySelectorAll('span,div').forEach(s=>{s.style.fontSize='6px';s.style.padding='0';s.style.lineHeight='1'});
     // ▲▼アイコン非表示
     clone.querySelectorAll('.row-sort-icon,.row-sel-icon').forEach(i=>i.style.display='none');
-    clone.style.cssText='border-collapse:collapse;background:#fff;white-space:nowrap;overflow:visible;display:table;table-layout:auto;font-size:7px';
+    clone.style.cssText='border-collapse:collapse;background:#fff;white-space:nowrap;overflow:visible;display:table;table-layout:auto;font-size:6px';
     const wrap=document.createElement('div');
     wrap.style.cssText='position:absolute;left:-99999px;top:0;background:#fff;padding:10px;width:5000px;overflow:visible';
     const inner=document.createElement('div');
@@ -400,12 +400,13 @@ function App(){
       const maxDim=4000;
       const sc=Math.min(2,maxDim/Math.max(fullW,fullH));
       const canvas=await html2canvas(inner,{scale:sc,useCORS:true,backgroundColor:'#ffffff',windowWidth:Math.max(5000,fullW+200),windowHeight:fullH+100,width:fullW+20,height:fullH+10});
-      const imgW=277;
-      const imgH=(canvas.height/canvas.width)*imgW;
+      const pageW=297,pageH=210,maxW=285,maxH=190;
+      let imgW=maxW,imgH=(canvas.height/canvas.width)*imgW;
+      if(imgH>maxH){imgH=maxH;imgW=(canvas.width/canvas.height)*imgH}
       const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
       doc.setFontSize(14);
-      doc.text(`${year}/${String(month+1).padStart(2,'0')}`,10,9);
-      doc.addImage(canvas.toDataURL('image/png'),'PNG',10,13,imgW,Math.min(imgH,181));
+      doc.text(`${year}/${String(month+1).padStart(2,'0')}`,6,9);
+      doc.addImage(canvas.toDataURL('image/png'),'PNG',(pageW-imgW)/2,13,imgW,imgH);
       doc.save(`shift_${year}-${String(month+1).padStart(2,'0')}.pdf`);
       flash('PDFを出力しました');
     }catch(e){flash('PDF生成に失敗しました')}
