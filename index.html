@@ -374,16 +374,13 @@ function App(){
     const{jsPDF}=window.jspdf;
     const orig=document.querySelector('.stbl');
     if(!orig)return;
-    // tableをクローンして画面外に配置してキャプチャ（縮小版）
+    // tableをクローンして画面外に配置してキャプチャ
     const clone=orig.cloneNode(true);
     clone.querySelectorAll('.tr-summary,.tr-add').forEach(r=>r.remove());
     clone.querySelectorAll('.td-name,.th-name').forEach(t=>{t.style.position='static';t.style.left='auto'});
-    // 全セル縮小（フォント7px、枠余白最小）
-    clone.querySelectorAll('td,th').forEach(c=>{c.style.padding='0';c.style.fontSize='7px';c.style.minWidth='auto';c.style.maxWidth='none';c.style.lineHeight='1'});
-    clone.querySelectorAll('span,div').forEach(s=>{s.style.fontSize='7px';s.style.padding='0 1px';s.style.lineHeight='1'});
     // ▲▼アイコン非表示
     clone.querySelectorAll('.row-sort-icon,.row-sel-icon').forEach(i=>i.style.display='none');
-    clone.style.cssText='border-collapse:collapse;background:#fff;white-space:nowrap;overflow:visible;display:table;table-layout:auto;font-size:7px';
+    clone.style.cssText='border-collapse:collapse;background:#fff;white-space:nowrap;overflow:visible;display:table;table-layout:auto';
     const wrap=document.createElement('div');
     wrap.style.cssText='position:absolute;left:-99999px;top:0;background:#fff;padding:10px;width:5000px;overflow:visible';
     const inner=document.createElement('div');
@@ -400,7 +397,7 @@ function App(){
       const maxDim=4000;
       const sc=Math.min(2,maxDim/Math.max(fullW,fullH));
       const canvas=await html2canvas(inner,{scale:sc,useCORS:true,backgroundColor:'#ffffff',windowWidth:Math.max(5000,fullW+200),windowHeight:fullH+100,width:fullW+20,height:fullH+10});
-      const pageW=297,pageH=210,maxW=240,maxH=170;
+      const pageW=297,maxW=270,maxH=190;
       let imgW=maxW,imgH=(canvas.height/canvas.width)*imgW;
       if(imgH>maxH){imgH=maxH;imgW=(canvas.width/canvas.height)*imgH}
       const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
