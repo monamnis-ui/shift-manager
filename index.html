@@ -397,12 +397,12 @@ function App(){
       const maxDim=3500;
       const sc=Math.min(1.5,maxDim/Math.max(fullW,fullH));
       const canvas=await html2canvas(inner,{scale:sc,useCORS:true,backgroundColor:'#ffffff',foreignObjectRendering:false,logging:false,windowWidth:fullW+500,windowHeight:fullH+200,width:fullW,height:fullH});
-      const pageW=297,maxW=270,maxH=190;
+      const pageW=297,maxW=291,maxH=193;
       let imgW=maxW,imgH=(canvas.height/canvas.width)*imgW;
       if(imgH>maxH){imgH=maxH;imgW=(canvas.width/canvas.height)*imgH}
       const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
       doc.setFontSize(14);
-      doc.text(`${year}/${String(month+1).padStart(2,'0')}`,6,9);
+      doc.text(`${year}/${String(month+1).padStart(2,'0')}`,3,9);
       doc.addImage(canvas.toDataURL('image/png'),'PNG',(pageW-imgW)/2,13,imgW,imgH);
       doc.save(`shift_${year}-${String(month+1).padStart(2,'0')}.pdf`);
       flash('PDFを出力しました');
