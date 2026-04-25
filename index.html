@@ -391,14 +391,12 @@ function App(){
     try{
       await new Promise(r=>setTimeout(r,300));
       const r=clone.getBoundingClientRect();
-      const fullW=Math.ceil(Math.max(clone.scrollWidth,clone.offsetWidth,r.width)+10);
-      const fullH=Math.ceil(Math.max(clone.scrollHeight,clone.offsetHeight,r.height)+10);
-      // iOS Safari Canvas制限対応：表が大きい場合はスケールを下げる
+      const fullW=Math.ceil(Math.max(clone.scrollWidth,clone.offsetWidth,r.width));
+      const fullH=Math.ceil(Math.max(clone.scrollHeight,clone.offsetHeight,r.height));
+      // iOS Safari Canvas制限対応
       const maxDim=4000;
       const sc=Math.min(2,maxDim/Math.max(fullW,fullH));
-      // wrapを正確なサイズにして全体をキャプチャ
-      wrap.style.width=fullW+'px';
-      const canvas=await html2canvas(wrap,{scale:sc,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:fullW+100,windowHeight:fullH+100});
+      const canvas=await html2canvas(clone,{scale:sc,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:fullW+200,width:fullW+5,height:fullH+5});
       const pageW=297,maxW=291,maxH=193;
       let imgW=maxW,imgH=(canvas.height/canvas.width)*imgW;
       if(imgH>maxH){imgH=maxH;imgW=(canvas.width/canvas.height)*imgH}
