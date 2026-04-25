@@ -390,13 +390,15 @@ function App(){
     document.body.appendChild(wrap);
     try{
       await new Promise(r=>setTimeout(r,300));
-      const r=inner.getBoundingClientRect();
-      const fullW=Math.ceil(Math.max(inner.scrollWidth,inner.offsetWidth,r.width));
-      const fullH=Math.ceil(Math.max(inner.scrollHeight,inner.offsetHeight,r.height));
+      const r=clone.getBoundingClientRect();
+      const fullW=Math.ceil(Math.max(clone.scrollWidth,clone.offsetWidth,r.width)+10);
+      const fullH=Math.ceil(Math.max(clone.scrollHeight,clone.offsetHeight,r.height)+10);
       // iOS Safari Canvas制限対応：表が大きい場合はスケールを下げる
-      const maxDim=3500;
-      const sc=Math.min(1.5,maxDim/Math.max(fullW,fullH));
-      const canvas=await html2canvas(inner,{scale:sc,useCORS:true,backgroundColor:'#ffffff',foreignObjectRendering:false,logging:false,windowWidth:fullW+500,windowHeight:fullH+200,width:fullW,height:fullH});
+      const maxDim=4000;
+      const sc=Math.min(2,maxDim/Math.max(fullW,fullH));
+      // wrapを正確なサイズにして全体をキャプチャ
+      wrap.style.width=fullW+'px';
+      const canvas=await html2canvas(wrap,{scale:sc,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:fullW+100,windowHeight:fullH+100});
       const pageW=297,maxW=291,maxH=193;
       let imgW=maxW,imgH=(canvas.height/canvas.width)*imgW;
       if(imgH>maxH){imgH=maxH;imgW=(canvas.width/canvas.height)*imgH}
