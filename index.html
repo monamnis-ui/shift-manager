@@ -391,7 +391,10 @@ function App(){
       const r=clone.getBoundingClientRect();
       const fullW=Math.ceil(Math.max(clone.scrollWidth,clone.offsetWidth,r.width));
       const fullH=Math.ceil(Math.max(clone.scrollHeight,clone.offsetHeight,r.height));
-      const canvas=await html2canvas(inner,{scale:2,useCORS:true,backgroundColor:'#ffffff',windowWidth:5000,windowHeight:fullH+100,width:fullW+20,height:fullH+10});
+      // iOS Safari Canvas制限(4096px)対応：スケールを動的調整
+      const maxDim=4000;
+      const sc=Math.min(2,maxDim/Math.max(fullW,fullH));
+      const canvas=await html2canvas(inner,{scale:sc,useCORS:true,backgroundColor:'#ffffff',windowWidth:Math.max(5000,fullW+200),windowHeight:fullH+100,width:fullW+20,height:fullH+10});
       const imgW=277;
       const imgH=(canvas.height/canvas.width)*imgW;
       const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
