@@ -374,6 +374,7 @@ function App(){
     if(!orig)return null;
     const clone=orig.cloneNode(true);
     clone.querySelectorAll('.tr-summary,.tr-add').forEach(r=>r.remove());
+    clone.querySelectorAll('.th-sum,.td-sum').forEach(c=>c.remove());
     clone.querySelectorAll('.td-name,.th-name').forEach(t=>{t.style.position='static';t.style.left='auto'});
     clone.querySelectorAll('.row-sort-icon,.row-sel-icon').forEach(i=>i.style.display='none');
     clone.style.cssText='border-collapse:collapse;background:#fff;white-space:nowrap;overflow:visible;display:table;table-layout:auto';
@@ -418,6 +419,7 @@ function App(){
     // tableをクローンして画面外に配置してキャプチャ
     const clone=orig.cloneNode(true);
     clone.querySelectorAll('.tr-summary,.tr-add').forEach(r=>r.remove());
+    clone.querySelectorAll('.th-sum,.td-sum').forEach(c=>c.remove());
     clone.querySelectorAll('.td-name,.th-name').forEach(t=>{t.style.position='static';t.style.left='auto'});
     // ▲▼アイコン非表示
     clone.querySelectorAll('.row-sort-icon,.row-sel-icon').forEach(i=>i.style.display='none');
