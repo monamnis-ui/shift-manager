@@ -374,11 +374,15 @@ function App(){
     const{jsPDF}=window.jspdf;
     const orig=document.querySelector('.stbl');
     if(!orig)return;
-    // tableをクローンして画面外に配置してキャプチャ
+    // tableをクローンして画面外に配置してキャプチャ（縮小版）
     const clone=orig.cloneNode(true);
     clone.querySelectorAll('.tr-summary,.tr-add').forEach(r=>r.remove());
     clone.querySelectorAll('.td-name,.th-name').forEach(t=>{t.style.position='static';t.style.left='auto'});
-    clone.style.cssText='border-collapse:collapse;background:#fff;white-space:nowrap;overflow:visible;display:table;table-layout:auto';
+    // 全セル縮小
+    clone.querySelectorAll('td,th').forEach(c=>{c.style.padding='1px 2px';c.style.fontSize='9px';c.style.minWidth='auto';c.style.maxWidth='none'});
+    // ▲▼アイコン非表示
+    clone.querySelectorAll('.row-sort-icon,.row-sel-icon').forEach(i=>i.style.display='none');
+    clone.style.cssText='border-collapse:collapse;background:#fff;white-space:nowrap;overflow:visible;display:table;table-layout:auto;font-size:9px';
     const wrap=document.createElement('div');
     wrap.style.cssText='position:absolute;left:-99999px;top:0;background:#fff;padding:10px;width:5000px;overflow:visible';
     const inner=document.createElement('div');
