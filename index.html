@@ -379,10 +379,11 @@ function App(){
     clone.querySelectorAll('.tr-summary,.tr-add').forEach(r=>r.remove());
     clone.querySelectorAll('.td-name,.th-name').forEach(t=>{t.style.position='static';t.style.left='auto'});
     // 全セル縮小
-    clone.querySelectorAll('td,th').forEach(c=>{c.style.padding='1px 2px';c.style.fontSize='9px';c.style.minWidth='auto';c.style.maxWidth='none'});
+    clone.querySelectorAll('td,th').forEach(c=>{c.style.padding='0px 1px';c.style.fontSize='7px';c.style.minWidth='auto';c.style.maxWidth='none';c.style.lineHeight='1.1'});
+    clone.querySelectorAll('span,div').forEach(s=>{s.style.fontSize='7px';s.style.padding='0';s.style.lineHeight='1.1'});
     // ▲▼アイコン非表示
     clone.querySelectorAll('.row-sort-icon,.row-sel-icon').forEach(i=>i.style.display='none');
-    clone.style.cssText='border-collapse:collapse;background:#fff;white-space:nowrap;overflow:visible;display:table;table-layout:auto;font-size:9px';
+    clone.style.cssText='border-collapse:collapse;background:#fff;white-space:nowrap;overflow:visible;display:table;table-layout:auto;font-size:7px';
     const wrap=document.createElement('div');
     wrap.style.cssText='position:absolute;left:-99999px;top:0;background:#fff;padding:10px;width:5000px;overflow:visible';
     const inner=document.createElement('div');
