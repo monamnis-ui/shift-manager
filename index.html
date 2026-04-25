@@ -368,6 +368,47 @@ function App(){
     });
   };
 
+  // 表をキャプチャしてcanvasを返す共通関数
+  const captureTable=async()=>{
+    const orig=document.querySelector('.stbl');
+    if(!orig)return null;
+    const clone=orig.cloneNode(true);
+    clone.querySelectorAll('.tr-summary,.tr-add').forEach(r=>r.remove());
+    clone.querySelectorAll('.td-name,.th-name').forEach(t=>{t.style.position='static';t.style.left='auto'});
+    clone.querySelectorAll('.row-sort-icon,.row-sel-icon').forEach(i=>i.style.display='none');
+    clone.style.cssText='border-collapse:collapse;background:#fff;white-space:nowrap;overflow:visible;display:table;table-layout:auto';
+    const wrap=document.createElement('div');
+    wrap.style.cssText='position:absolute;left:-99999px;top:0;background:#fff;padding:0;width:5000px;overflow:visible';
+    const inner=document.createElement('div');
+    inner.style.cssText='display:inline-block;background:#fff;padding:2px';
+    inner.appendChild(clone);
+    wrap.appendChild(inner);
+    document.body.appendChild(wrap);
+    try{
+      await new Promise(r=>setTimeout(r,300));
+      const r=inner.getBoundingClientRect();
+      const fullW=Math.ceil(Math.max(inner.scrollWidth,inner.offsetWidth,r.width));
+      const fullH=Math.ceil(Math.max(inner.scrollHeight,inner.offsetHeight,r.height));
+      const maxDim=4000;
+      const sc=Math.min(2,maxDim/Math.max(fullW,fullH));
+      return await html2canvas(inner,{scale:sc,useCORS:true,backgroundColor:'#ffffff',logging:false,windowWidth:fullW+500,width:fullW,height:fullH});
+    }finally{document.body.removeChild(wrap)}
+  };
+
+  // JPG出力（iPhone推奨：制限が少ない）
+  const exportJPG=async()=>{
+    flash('画像生成中...');
+    try{
+      const canvas=await captureTable();
+      if(!canvas){flash('画像生成に失敗しました');return}
+      const link=document.createElement('a');
+      link.download=`shift_${year}-${String(month+1).padStart(2,'0')}.jpg`;
+      link.href=canvas.toDataURL('image/jpeg',0.92);
+      link.click();
+      flash('画像を出力しました');
+    }catch(e){flash('画像生成に失敗しました')}
+  };
+
   // PDF出力
   const exportPDF=async()=>{
     flash('PDF生成中...');
@@ -454,6 +495,7 @@ function App(){
           {bulkMode?`☑ ${selected.size}件選択中`:'☑ まとめて入力'}
         </button>
         <button className="btn btn-ghost btn-sm" onClick={exportPDF}>📄 PDF</button>
+        <button className="btn btn-ghost btn-sm" onClick={exportJPG}>🖼 JPG</button>
         <button className="btn btn-ghost btn-sm" onClick={exportCSV}>⬇ CSV</button>
       </header>
 
