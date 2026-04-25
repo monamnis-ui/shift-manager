@@ -513,7 +513,7 @@ function App(){
         <table className="stbl">
           <thead>
             <tr>
-              <th className="th-name">スタッフ</th>
+              <th className="th-name">{year}/{String(month+1).padStart(2,'0')}</th>
               {Array.from({length:n},(_,i)=>{
                 const d=i+1,dow=new Date(year,month,d).getDay(),hol=isHol(year,month,d);
                 const isToday=year===now.getFullYear()&&month===now.getMonth()&&d===now.getDate();
