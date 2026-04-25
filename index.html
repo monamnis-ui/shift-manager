@@ -377,17 +377,21 @@ function App(){
     // tableをクローンして画面外に配置してキャプチャ
     const clone=orig.cloneNode(true);
     clone.querySelectorAll('.tr-summary,.tr-add').forEach(r=>r.remove());
-    clone.querySelectorAll('.td-name,.th-name').forEach(t=>{t.style.position='static'});
-    clone.style.overflow='visible';
+    clone.querySelectorAll('.td-name,.th-name').forEach(t=>{t.style.position='static';t.style.left='auto'});
+    clone.style.cssText='border-collapse:collapse;background:#fff;white-space:nowrap;overflow:visible;display:table;table-layout:auto';
     const wrap=document.createElement('div');
-    wrap.style.cssText='position:fixed;left:-99999px;top:0;background:#fff;padding:10px;width:auto';
-    wrap.appendChild(clone);
+    wrap.style.cssText='position:absolute;left:-99999px;top:0;background:#fff;padding:10px;width:5000px;overflow:visible';
+    const inner=document.createElement('div');
+    inner.style.cssText='display:inline-block;background:#fff;padding:5px';
+    inner.appendChild(clone);
+    wrap.appendChild(inner);
     document.body.appendChild(wrap);
     try{
-      await new Promise(r=>setTimeout(r,100));
-      const fullW=clone.scrollWidth;
-      const fullH=clone.scrollHeight;
-      const canvas=await html2canvas(clone,{scale:2,useCORS:true,backgroundColor:'#ffffff',windowWidth:fullW+200,width:fullW,height:fullH});
+      await new Promise(r=>setTimeout(r,200));
+      const r=clone.getBoundingClientRect();
+      const fullW=Math.ceil(Math.max(clone.scrollWidth,clone.offsetWidth,r.width));
+      const fullH=Math.ceil(Math.max(clone.scrollHeight,clone.offsetHeight,r.height));
+      const canvas=await html2canvas(inner,{scale:2,useCORS:true,backgroundColor:'#ffffff',windowWidth:5000,windowHeight:fullH+100,width:fullW+20,height:fullH+10});
       const imgW=277;
       const imgH=(canvas.height/canvas.width)*imgW;
       const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
@@ -396,7 +400,7 @@ function App(){
       doc.addImage(canvas.toDataURL('image/png'),'PNG',10,13,imgW,Math.min(imgH,181));
       doc.save(`shift_${year}-${String(month+1).padStart(2,'0')}.pdf`);
       flash('PDFを出力しました');
-    }catch{flash('PDF生成に失敗しました')}
+    }catch(e){flash('PDF生成に失敗しました')}
     finally{document.body.removeChild(wrap)}
   };
 
