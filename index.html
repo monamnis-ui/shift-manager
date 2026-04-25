@@ -373,13 +373,22 @@ function App(){
     flash('PDF生成中...');
     const{jsPDF}=window.jspdf;
     const table=document.querySelector('.stbl');
+    const main=document.querySelector('.main');
     if(!table)return;
     try{
-      // 合計時間・人件費・人数行・スタッフ追加行を一時非表示
+      // 合計時間・人件費行・スタッフ追加行を一時非表示、stickyを解除
       const hideRows=table.querySelectorAll('.tr-summary,.tr-add');
       hideRows.forEach(r=>r.style.display='none');
-      const canvas=await html2canvas(table,{scale:2,useCORS:true,backgroundColor:'#ffffff',scrollX:0,scrollY:0,windowWidth:table.scrollWidth,width:table.scrollWidth});
+      const stickyTds=table.querySelectorAll('.td-name,.th-name');
+      stickyTds.forEach(t=>{t.dataset._pos=t.style.position;t.style.position='static'});
+      const mainOverflow=main?main.style.overflowX:'';
+      if(main)main.style.overflowX='visible';
+      const fullW=table.scrollWidth;
+      const fullH=table.scrollHeight;
+      const canvas=await html2canvas(table,{scale:2,useCORS:true,backgroundColor:'#ffffff',scrollX:0,scrollY:0,windowWidth:fullW+50,width:fullW,height:fullH});
       hideRows.forEach(r=>r.style.display='');
+      stickyTds.forEach(t=>{t.style.position=t.dataset._pos||'';delete t.dataset._pos});
+      if(main)main.style.overflowX=mainOverflow;
       const imgW=277;
       const imgH=(canvas.height/canvas.width)*imgW;
       const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
